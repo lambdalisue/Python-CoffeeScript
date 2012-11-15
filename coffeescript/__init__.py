@@ -1,12 +1,12 @@
 #!python3
-#encoding: shift-jis
+#encoding: utf-8
 from __future__ import division, unicode_literals, print_function
 
 # Copyright (c) 2011 Omoto Kenji
 # Released under the MIT license. See `LICENSE` for details.
 
 '''
-Python CoffeeScript is a bridge to the JS CoffeeScript compiler. 
+Python CoffeeScript is a bridge to the JS CoffeeScript compiler.
 
 A short example:
 
@@ -17,36 +17,34 @@ A short example:
     >>> print(coffeescript.compile('add = (a, b) -> a + b'))
     (function() {
       var add;
-    
+
       add = function(a, b) {
         return a + b;
       };
-    
+
     }).call(this);
 '''
-
 __license__ = str("MIT License")
-
 __all__ = 'compile Compiler'.split()
 
-import os
 import io
 import execjs
 
 EngineError = execjs.RuntimeError
 CompilationError = execjs.ProgramError
+_compiler = None
 
 
 class Compiler:
     def __init__(self, compiler_script, runtime):
         self._compiler_script = compiler_script
         self._runtime = runtime
-        
+
     def compile(self, script, bare=False):
         if not hasattr(self, '_context'):
             self._context = self._runtime.compile(self._compiler_script)
-        return self._context.call("CoffeeScript.compile", script, {'bare':bare})
-    
+        return self._context.call("CoffeeScript.compile", script, {'bare': bare})
+
     def compile_file(self, filename, encoding="utf-8", bare=False):
         with io.open(filename, encoding=encoding) as fp:
             return self.compile(fp.read(), bare=bare)
@@ -58,7 +56,6 @@ class Compiler:
                 buf.append(fp.read())
         return self.compile("\n\n".join(buf), bare=bare)
 
-_compiler = None
 
 def _default_compiler_script():
     from os.path import dirname, join
@@ -87,6 +84,7 @@ def compile(script, bare=False):
 
 def compile_file(filename, encoding="utf-8", bare=False):
     return _default_compiler().compile_file(filename, encoding=encoding, bare=bare)
+
 
 def compile_files(filenames, encoding="utf-8", bare=False):
     return _default_compiler().compile_files(filenames, encoding=encoding, bare=bare)
