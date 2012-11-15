@@ -51,6 +51,13 @@ class Compiler:
         with io.open(filename, encoding=encoding) as fp:
             return self.compile(fp.read(), bare=bare)
 
+    def compile_files(self, filenames, encoding="utf-8", bare=False):
+        buf = []
+        for filename in filenames:
+            with io.open(filename, encoding=encoding) as fp:
+                buf.append(fp.read())
+        return self.compile("\n\n".join(buf), bare=bare)
+
 _compiler = None
 
 def _default_compiler_script():
@@ -77,5 +84,9 @@ def _default_compiler():
 def compile(script, bare=False):
     return _default_compiler().compile(script, bare=bare)
 
+
 def compile_file(filename, encoding="utf-8", bare=False):
     return _default_compiler().compile_file(filename, encoding=encoding, bare=bare)
+
+def compile_files(filenames, encoding="utf-8", bare=False):
+    return _default_compiler().compile_files(filenames, encoding=encoding, bare=bare)

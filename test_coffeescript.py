@@ -97,8 +97,48 @@ class CoffeeScriptTest(unittest.TestCase):
                             encoding=wrong_encoding, bare=False)
             finally:
                 os.remove(filename)
-    
-    
+
+    def test_compile_files_together(self):
+        from os.path import join
+        cfcodes = (
+            "add = (a, b) -> a + b",
+            "sub = (a, b) -> a - b",
+            "mul = (a, b) -> a * b",
+            "div = (a, b) -> a / b",
+        )
+
+        # Create Temp CoffeeScript files
+        root = tempfile.mkdtemp()
+        filenames = []
+        for i, cfcode in enumerate(cfcodes):
+            filename = join(root, "{0}.coffee".format(i))
+            with io.open(filename, "w") as fp:
+                fp.write(cfcode)
+            filenames.append(filename)
+
+        try:
+            for compiler, runtime in itertools.product(self.compilers, self.runtimes):
+                jscode = coffeescript.compile_files(filenames, bare=True)
+                ctx = runtime.compile(jscode)
+                self.assertEqual(ctx.call("add", 1, 2), 3)
+                self.assertEqual(ctx.call("sub", 2, 1), 1)
+                self.assertEqual(ctx.call("mul", 2, 3), 6)
+                self.assertEqual(ctx.call("div", 8, 2), 4)
+
+                jscode = coffeescript.compile_files(filenames, bare=False)
+                ctx = runtime.compile(jscode)
+                with self.assertRaises(execjs.ProgramError):
+                    self.assertEqual(ctx.call("add", 1, 2), 3)
+                with self.assertRaises(execjs.ProgramError):
+                    self.assertEqual(ctx.call("sub", 1, 2), 3)
+                with self.assertRaises(execjs.ProgramError):
+                    self.assertEqual(ctx.call("mul", 1, 2), 3)
+                with self.assertRaises(execjs.ProgramError):
+                    self.assertEqual(ctx.call("div", 1, 2), 3)
+        finally:
+            import shutil
+            shutil.rmtree(root)
+
 def load_tests(loader, tests, ignore):
 ##    tests.addTests(doctest.DocTestSuite(coffeescript))
     return tests
