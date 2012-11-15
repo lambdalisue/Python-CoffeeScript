@@ -1,25 +1,29 @@
-#!python3
-#encoding: ascii
+#!/usr/bin/env python
 from setuptools import setup
-import sys
 import io
 
-with io.open('README.rst', encoding='ascii') as fp:
-    long_description = fp.read()
+
+def readfile(filename, encoding='utf-8'):
+    with io.open(filename, encoding=encoding) as fp:
+        return fp.read()
+
+
+def getversion():
+    import coffeescript
+    return coffeescript.__version__
+
 
 setup(
     name='CoffeeScript',
-    version="1.0.4",
+    version=getversion(),
     author='OMOTO Kenji',
     description='A bridge to the JS CoffeeScript compiler',
-    
     packages=['coffeescript'],
     package_dir={'coffeescript': 'coffeescript'},
     package_data={
         'coffeescript': ['coffee-script.js'],
     },
-    
-    long_description=long_description,
+    long_description=readfile('README.rst'),
     url='https://github.com/doloopwhile/Python-CoffeeScript',
     author_email='doloopwhile@gmail.com',
     license="MIT License",
@@ -35,6 +39,6 @@ setup(
         'Programming Language :: Python :: 3.2',
         'Programming Language :: JavaScript',
     ],
-    install_requires="PyExecJS".split(),
+    install_requires=("PyExecJS",),
     test_suite="test_coffeescript",
 )
